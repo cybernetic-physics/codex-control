@@ -1,0 +1,34 @@
+# Python build / bytecode
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+
+# Virtualenvs
+.venv/
+venv/
+.env
+
+# Build outputs
+build/
+dist/
+*.whl
+*.tar.gz
+
+# Pytest / mypy / ruff
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Example traces (don't commit run artefacts)
+examples/traces/
+
+# Editor / OS noise
+.idea/
+.vscode/
+.DS_Store
+*.swp
