@@ -1,0 +1,25 @@
+# Python client container. Doesn't need codex installed — it talks
+# JSON-RPC over WebSocket to the codex-server container.
+#
+# Build context is `examples/remote/`. `run.sh` first builds a wheel of
+# codex-control via `uv build` and drops it into ./_build/ inside this
+# context, so the image always picks up the local source instead of
+# pulling from a registry.
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install the codex-control wheel and websocket extras. The wheel is
+# placed in _build/ by the run.sh orchestrator before `docker build`.
+COPY _build/codex_control-*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/codex_control-*.whl \
+ && pip install --no-cache-dir "websockets==15.0.1" \
+ && rm /tmp/codex_control-*.whl
+
+# Demo scripts.
+COPY 14_remote_smoke.py /app/
+COPY 15_remote_grpo.py  /app/
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python3", "/app/14_remote_smoke.py"]

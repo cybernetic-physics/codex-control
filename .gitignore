@@ -27,6 +27,9 @@ coverage.xml
 # Example traces (don't commit run artefacts)
 examples/traces/
 
+# Docker harness wheel-build cache (rebuilt by run.sh)
+examples/remote/_build/
+
 # Editor / OS noise
 .idea/
 .vscode/

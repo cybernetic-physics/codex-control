@@ -1,0 +1,75 @@
+# Two-container layout: codex-server runs `codex app-server` with a WS
+# listener; codex-client is our Python remote-control script. They share
+# a private bridge network — only the two containers can reach each other.
+#
+# Auth: WS_TOKEN is a 32-byte hex string from `openssl rand -hex 32`.
+# The server gets only its sha256 (so the raw secret never appears in
+# the process listing on the server container); the client gets the
+# raw token to send as Authorization: Bearer.
+#
+# Before invoking compose, build the codex-control wheel into ./_build/
+# so Dockerfile.client can install it:
+#
+#     (cd ../.. && uv run --with build python -m build --wheel --outdir examples/remote/_build)
+#
+# Then:
+#
+#     WS_TOKEN=$(openssl rand -hex 32) \
+#     WS_TOKEN_SHA256=$(printf '%s' "$WS_TOKEN" | openssl dgst -sha256 -hex | awk '{print $2}') \
+#     CODEX_HOME_HOST=$HOME/.codex \
+#     docker compose up --build
+#
+# If you have `docker compose v1` you'll likely hit
+# `KeyError: 'ContainerConfig'` on recreate — fall back to ./run.sh,
+# which uses raw `docker run`.
+
+services:
+  codex-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    image: codex-control-server:latest
+    environment:
+      WS_TOKEN_SHA256: ${WS_TOKEN_SHA256:?set WS_TOKEN_SHA256 in env}
+      RUST_LOG: info
+    volumes:
+      # Mount ONLY the host's auth.json (read-only) into a side directory.
+      # The entrypoint copies it into the container-side $CODEX_HOME which
+      # is writable, so codex's sqlite state DB and rollout files work.
+      - ${CODEX_HOME_HOST}/auth.json:/auth-source/auth.json:ro
+    networks:
+      - codex-net
+    # Don't expose the WS port on the host — only the client container
+    # talks to it, through the bridge network. (For RL across machines
+    # you'd expose it and add proper TLS in front, but inside a single
+    # box this is tighter.)
+    expose:
+      - "8765"
+    healthcheck:
+      # /readyz returns 200 once the listener accepts connections.
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8765/readyz"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+      start_period: 5s
+
+  codex-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    image: codex-control-client:latest
+    depends_on:
+      codex-server:
+        condition: service_healthy
+    environment:
+      REMOTE_URL: ws://codex-server:8765
+      WS_TOKEN: ${WS_TOKEN:?set WS_TOKEN in env}
+      K: ${K:-4}
+    networks:
+      - codex-net
+    # The default CMD runs the smoke test; the grpo demo is run via:
+    #   docker compose run --rm codex-client python3 /app/15_remote_grpo.py
+
+networks:
+  codex-net:
+    driver: bridge

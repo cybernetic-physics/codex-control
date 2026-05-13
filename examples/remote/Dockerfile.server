@@ -1,0 +1,27 @@
+# Codex app-server container. Pinned to the same codex-cli version the
+# schemas/ in the experiments dir were generated against — bump in lockstep.
+FROM node:20-slim
+
+ARG CODEX_VERSION=0.128.0
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git ca-certificates curl \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g "@openai/codex@${CODEX_VERSION}" \
+ && codex --version
+
+# Container-side CODEX_HOME — fully writable. The user's auth.json is
+# copied in at startup by entrypoint.sh from /auth-source/, which is the
+# read-only mount of the host's ~/.codex/auth.json. We do NOT mount the
+# host ~/.codex directly read-only — codex's sqlite state DB needs write
+# access.
+ENV CODEX_HOME=/codex-home
+RUN mkdir -p /codex-home /auth-source
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8765
+
+ENTRYPOINT ["/entrypoint.sh"]
