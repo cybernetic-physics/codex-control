@@ -12,13 +12,15 @@ The library is organised around four layers, each importable directly:
 On top of those we ship RL-shaped helpers:
 
 * :mod:`codex_control.budget`     — :class:`Budget` + :class:`BudgetSteerWatcher`
-* :mod:`codex_control.rollouts`   — :func:`parallel_rollouts`, :func:`grpo_advantage`
-* :mod:`codex_control.tree`       — fork-based tree search
-* :mod:`codex_control.verifiers`  — :class:`Verifier` protocol + ``PytestVerifier``, …
-* :mod:`codex_control.rlvr`       — :func:`run_rlvr_episode`
 * :mod:`codex_control.handlers`   — approval-handler protocol + ``RegexGate``
 * :mod:`codex_control.traces`     — :class:`TraceWriter`
 * :mod:`codex_control.introspect` — capability dossier
+
+Five-package refactor note: as of v0.1, parallel-rollout running,
+fork-based tree search, RLVR episodes, and the verifier batteries moved
+to sibling packages (``codex_orchestrate`` and ``codex_env``). The
+legacy ``rollouts.grpo_advantage`` math and ``verifiers`` shim re-exports
+remain here for one release of grace.
 
 Typical usage::
 
@@ -83,32 +85,15 @@ from .protocol import (
     TurnInput,
     TurnStatus,
 )
-from .rlvr import (
-    RlvrEpisode,
-    pytest_followup,
-    regex_followup,
-    run_rlvr_episode,
-    shape_rlvr_reward,
-)
 from .rollouts import (
     GroupStats,
     RolloutResult,
     grpo_advantage,
-    parallel_rollouts,
-    single_turn_group,
 )
 from .session import CodexSession, Subscription
 from .thread import Thread, build_demo_pair, build_developer_hint
 from .transport import StdioTransport, Transport
 from .traces import TraceWriter, write_group_json, write_turn_jsonl
-from .tree import (
-    Node,
-    expand,
-    expand_all,
-    fork_tree_search,
-    length_value,
-    select_uct,
-)
 from .turn import TurnHandle, collect_turn
 from .verifiers import (
     CompositeVerifier,
@@ -163,20 +148,11 @@ __all__ = [
     "BudgetSteerWatcher",
     "DEFAULT_STEER_PROMPT",
     "make_token_usage_callback",
-    # rollouts
+    # rollouts (legacy — moves to codex-train in Phase 4)
     "RolloutResult",
     "GroupStats",
-    "parallel_rollouts",
     "grpo_advantage",
-    "single_turn_group",
-    # tree
-    "Node",
-    "expand",
-    "expand_all",
-    "fork_tree_search",
-    "length_value",
-    "select_uct",
-    # verifiers
+    # verifiers (legacy — re-exported from codex_env for one release)
     "Verifier",
     "VerifierResult",
     "RegexVerifier",
@@ -184,12 +160,6 @@ __all__ = [
     "SubprocessVerifier",
     "PytestVerifier",
     "CompositeVerifier",
-    # rlvr
-    "RlvrEpisode",
-    "run_rlvr_episode",
-    "shape_rlvr_reward",
-    "pytest_followup",
-    "regex_followup",
     # introspection
     "CapabilityDossier",
     "fetch_dossier",

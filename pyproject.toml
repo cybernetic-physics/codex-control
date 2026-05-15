@@ -22,15 +22,22 @@ dependencies = []
 
 [project.optional-dependencies]
 websocket = ["websockets>=15,<16"]
+# Optional compat-only dependency so the legacy ``codex_control.verifiers``
+# re-exports work. The real home of the verifiers is :mod:`codex_env`.
+verifiers-compat = ["codex-env>=0.1.0"]
 test = [
     "pytest>=8",
     "pytest-asyncio>=0.23",
+    "codex-env",
 ]
 dev = [
-    "codex-control[websocket,test]",
+    "codex-control[websocket,test,verifiers-compat]",
     "ruff>=0.5",
     "mypy>=1.10",
 ]
+
+[tool.uv.sources]
+codex-env = { path = "../codex-env", editable = true }
 
 [project.urls]
 "Source" = "https://github.com/anthropics/rl-agent-work"

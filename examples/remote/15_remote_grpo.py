@@ -8,12 +8,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from codex_control import (
-    CodexSession,
-    RolloutResult,
-    TraceWriter,
-    parallel_rollouts,
-)
+from codex_control import CodexSession, TraceWriter
+from codex_orchestrate.parallel import RolloutResult, parallel_rollouts
 
 
 TASKS = [

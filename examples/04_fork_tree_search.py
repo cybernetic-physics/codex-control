@@ -15,8 +15,10 @@ from pathlib import Path
 
 from codex_control import (
     CodexSession,
-    Node,
     TraceWriter,
+)
+from codex_orchestrate.tree import (
+    Node,
     expand_all,
     length_value,
     select_uct,

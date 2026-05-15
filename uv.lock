@@ -59,6 +59,7 @@ source = { editable = "." }
 
 [package.optional-dependencies]
 dev = [
+    { name = "codex-env" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -66,8 +67,12 @@ dev = [
     { name = "websockets" },
 ]
 test = [
+    { name = "codex-env" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+]
+verifiers-compat = [
+    { name = "codex-env" },
 ]
 websocket = [
     { name = "websockets" },
@@ -75,12 +80,29 @@ websocket = [
 
 [package.metadata]
 requires-dist = [
-    { name = "codex-control", extras = ["websocket", "test"], marker = "extra == 'dev'" },
+    { name = "codex-control", extras = ["websocket", "test", "verifiers-compat"], marker = "extra == 'dev'" },
+    { name = "codex-env", marker = "extra == 'test'", editable = "../codex-env" },
+    { name = "codex-env", marker = "extra == 'verifiers-compat'", editable = "../codex-env" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.23" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
     { name = "websockets", marker = "extra == 'websocket'", specifier = ">=15,<16" },
+]
+
+[[package]]
+name = "codex-env"
+version = "0.1.0"
+source = { editable = "../codex-env" }
+
+[package.metadata]
+requires-dist = [
+    { name = "codex-env", extras = ["verifiers", "test"], marker = "extra == 'dev'" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8" },
+    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.23" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
+    { name = "verifiers", marker = "extra == 'verifiers'", specifier = ">=0.1" },
 ]
 
 [[package]]

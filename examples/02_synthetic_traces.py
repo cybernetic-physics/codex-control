@@ -1,8 +1,8 @@
 """K-parallel synthetic trace generation on one app-server process.
 
-Uses :func:`codex_control.parallel_rollouts` instead of hand-rolled
-``asyncio.gather``. Each member writes a typed JSONL trace via
-:class:`TraceWriter`.
+Uses :func:`codex_orchestrate.parallel.parallel_rollouts` instead of
+hand-rolled ``asyncio.gather``. Each member writes a typed JSONL trace
+via :class:`codex_control.TraceWriter`.
 """
 from __future__ import annotations
 
@@ -13,12 +13,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from codex_control import (
-    CodexSession,
-    RolloutResult,
-    TraceWriter,
-    parallel_rollouts,
-)
+from codex_control import CodexSession, TraceWriter
+from codex_orchestrate.parallel import RolloutResult, parallel_rollouts
 
 DEFAULT_TASKS = [
     "Write a haiku about garbage collection. Return only the haiku.",

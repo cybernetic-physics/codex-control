@@ -14,10 +14,11 @@ from pathlib import Path
 
 from codex_control import (
     CodexSession,
-    RegexVerifier,
     TraceWriter,
-    single_turn_group,
+    grpo_advantage,
 )
+from codex_env import RegexVerifier
+from codex_orchestrate.parallel import single_turn_group
 
 
 TASKS = [
@@ -41,13 +42,17 @@ async def main() -> None:
         for prompt, regex in TASKS:
             print(f"\n=== GROUP: {prompt!r} ===")
             t0 = time.perf_counter()
-            members, stats = await single_turn_group(
+            members = await single_turn_group(
                 session,
                 prompt=prompt,
                 verifier=RegexVerifier(regex),
                 k=group_size,
                 timeout=deadline_s,
             )
+            # Advantage math lives in codex-control (legacy) / codex-train
+            # (Phase 4); orchestrate's single_turn_group returns the raw
+            # members so the math is the caller's call.
+            stats = grpo_advantage(members)
             wall = time.perf_counter() - t0
             print(f"  wall={wall:.2f}s mean_reward={stats.mean_reward:.2f} std={stats.std_reward:.2f}")
             for m in members:

@@ -79,12 +79,16 @@ async with CodexSession.connect("ws://codex:8765", token="...") as session:
 | `codex_control.handlers`     | `RegexGate`, `AlwaysAccept`, `Composed`, …                 |
 | `codex_control.items`        | helpers over the typed item discriminator                  |
 | `codex_control.budget`       | `Budget`, `BudgetSteerWatcher`                             |
-| `codex_control.rollouts`     | `parallel_rollouts`, `grpo_advantage`, `single_turn_group` |
-| `codex_control.tree`         | fork-based tree search + UCB selector                      |
-| `codex_control.verifiers`    | `Verifier` protocol + `Regex/JsonSchema/Pytest/Composite`  |
-| `codex_control.rlvr`         | multi-turn RLVR loop with verifier + soft-limit steer      |
+| `codex_control.rollouts`     | legacy `RolloutResult` + `grpo_advantage` (moves to codex-train in Phase 4) |
+| `codex_control.verifiers`    | re-export shim for `codex_env.verifiers` (one release of grace) |
 | `codex_control.introspect`   | capability dossier (`fetch_dossier`)                       |
 | `codex_control.traces`       | JSONL/JSON trace writers                                   |
+
+Refactor note: the parallel-rollout runner, fork-tree search, and RLVR
+multi-turn loop moved to `codex_orchestrate` in the five-package split.
+Use `from codex_orchestrate.parallel import parallel_rollouts`,
+`from codex_orchestrate.tree import fork_tree_search`, and
+`from codex_orchestrate.jobs.rlvr import run_rlvr_episode` going forward.
 
 ## Mapping to the original experiments
 
