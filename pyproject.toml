@@ -40,7 +40,7 @@ dev = [
 codex-env = { path = "../codex-env", editable = true }
 
 [project.urls]
-"Source" = "https://github.com/anthropics/rl-agent-work"
+"Source" = "https://github.com/cybernetic-physics/codex-control"
 
 [build-system]
 requires = ["hatchling>=1.24"]
