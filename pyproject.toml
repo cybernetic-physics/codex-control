@@ -37,7 +37,8 @@ dev = [
 ]
 
 [tool.uv.sources]
-codex-env = { path = "../codex-env", editable = true }
+# codex-env = { path = "../codex-env", editable = true }
+codex-env = { git = "https://github.com/cybernetic-physics/codex-env.git" }
 
 [project.urls]
 "Source" = "https://github.com/cybernetic-physics/codex-control"
