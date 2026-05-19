@@ -21,6 +21,24 @@ from .base import Transport
 
 log = logging.getLogger(__name__)
 
+DEFAULT_STDIO_STREAM_LIMIT = 16 * 1024 * 1024
+"""Default stdout/stderr stream limit for app-server JSON-RPC frames."""
+
+
+def _default_stream_limit() -> int:
+    raw = os.environ.get("CODEX_CONTROL_STDIO_LIMIT")
+    if raw is None:
+        return DEFAULT_STDIO_STREAM_LIMIT
+    try:
+        return int(raw)
+    except ValueError:
+        log.warning(
+            "invalid CODEX_CONTROL_STDIO_LIMIT=%r; using %d",
+            raw,
+            DEFAULT_STDIO_STREAM_LIMIT,
+        )
+        return DEFAULT_STDIO_STREAM_LIMIT
+
 
 class StdioTransport(Transport):
     """One ``codex app-server`` subprocess, framed by ``\\n``.
@@ -40,6 +58,12 @@ class StdioTransport(Transport):
     stderr_cb
         Optional callable invoked with each (decoded) stderr line. If
         ``None``, stderr is logged at DEBUG level.
+    stream_limit
+        Maximum bytes buffered for a single stdout/stderr line from the
+        app-server subprocess. Codex can emit large JSON-RPC frames for
+        capability lists and tool results, so this defaults above
+        asyncio's 64 KiB stream limit. Override with the constructor or
+        ``CODEX_CONTROL_STDIO_LIMIT``.
     """
 
     def __init__(
@@ -50,12 +74,14 @@ class StdioTransport(Transport):
         env: Optional[dict[str, str]] = None,
         cwd: Optional[str] = None,
         stderr_cb: Optional[Callable[[str], None]] = None,
+        stream_limit: Optional[int] = None,
     ) -> None:
         self._codex_bin = codex_bin
         self._args = list(args)
         self._env_overrides = env or {}
         self._cwd = cwd
         self._stderr_cb = stderr_cb
+        self._stream_limit = stream_limit or _default_stream_limit()
 
         self._proc: Optional[asyncio.subprocess.Process] = None
         self._stderr_task: Optional[asyncio.Task[None]] = None
@@ -76,6 +102,7 @@ class StdioTransport(Transport):
                 stderr=asyncio.subprocess.PIPE,
                 env=env,
                 cwd=self._cwd,
+                limit=self._stream_limit,
             )
         except FileNotFoundError as exc:
             raise TransportError(
