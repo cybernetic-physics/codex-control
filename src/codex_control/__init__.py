@@ -39,6 +39,8 @@ Typical usage::
 
 from __future__ import annotations
 
+from typing import Any
+
 from ._version import __version__
 from .budget import (
     Budget,
@@ -95,15 +97,39 @@ from .thread import Thread, build_demo_pair, build_developer_hint
 from .transport import StdioTransport, Transport
 from .traces import TraceWriter, write_group_json, write_turn_jsonl
 from .turn import TurnHandle, collect_turn
-from .verifiers import (
-    CompositeVerifier,
-    JsonSchemaVerifier,
-    PytestVerifier,
-    RegexVerifier,
-    SubprocessVerifier,
-    Verifier,
-    VerifierResult,
-)
+
+_VERIFIER_EXPORTS = {
+    "CompositeVerifier",
+    "JsonSchemaVerifier",
+    "PytestVerifier",
+    "RegexVerifier",
+    "SubprocessVerifier",
+    "Verifier",
+    "VerifierResult",
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy-load verifier compatibility exports.
+
+    Core app-server control should not require ``codex_env``. The verifier
+    names remain available from ``codex_control`` when the compatibility extra
+    is installed, but importing ``codex_control.CodexSession`` stays lean.
+    """
+    if name not in _VERIFIER_EXPORTS:
+        raise AttributeError(f"module 'codex_control' has no attribute {name!r}")
+    try:
+        from . import verifiers as _verifiers
+    except ModuleNotFoundError as exc:
+        if exc.name and exc.name.startswith("codex_env"):
+            raise ImportError(
+                f"codex_control.{name} requires codex_env. Install verifier "
+                "compatibility extras with: pip install 'codex-control[verifiers-compat]'"
+            ) from exc
+        raise
+    value = getattr(_verifiers, name)
+    globals()[name] = value
+    return value
 
 __all__ = [
     # version
