@@ -48,6 +48,14 @@ from .budget import (
     DEFAULT_STEER_PROMPT,
     make_token_usage_callback,
 )
+from .cua import (
+    ComputerUseApp,
+    ComputerUseClient,
+    ComputerUseState,
+    DEFAULT_COMPUTER_USE_SERVER,
+    ensure_computer_use,
+    first_available_computer_use,
+)
 from .errors import (
     BudgetExceeded,
     CodexControlError,
@@ -174,11 +182,17 @@ __all__ = [
     "summarise",
     # plugins / CUA
     "CuaProvider",
+    "ComputerUseApp",
+    "ComputerUseClient",
+    "ComputerUseState",
+    "DEFAULT_COMPUTER_USE_SERVER",
     "McpServerStatus",
     "MarketplaceEntry",
     "McpToolResult",
     "Plugins",
+    "ensure_computer_use",
     "ensure_cua_provider",
+    "first_available_computer_use",
     "first_available_cua",
     # handlers
     "ApprovalHandler",
