@@ -92,6 +92,15 @@ from .rollouts import (
     RolloutResult,
     grpo_advantage,
 )
+from .mcp import McpToolResult
+from .plugins import (
+    CuaProvider,
+    McpServerStatus,
+    MarketplaceEntry,
+    Plugins,
+    ensure_cua_provider,
+    first_available_cua,
+)
 from .session import CodexSession, Subscription
 from .thread import Thread, build_demo_pair, build_developer_hint
 from .transport import StdioTransport, Transport
@@ -163,6 +172,14 @@ __all__ = [
     "command_string",
     "item_type_counts",
     "summarise",
+    # plugins / CUA
+    "CuaProvider",
+    "McpServerStatus",
+    "MarketplaceEntry",
+    "McpToolResult",
+    "Plugins",
+    "ensure_cua_provider",
+    "first_available_cua",
     # handlers
     "ApprovalHandler",
     "AlwaysAccept",
