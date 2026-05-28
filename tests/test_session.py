@@ -22,6 +22,21 @@ def _handshake_reply(transport: FakeTransport, frame: dict) -> None:
         })
 
 
+def test_connect_ws_accepts_tunnel_auth_headers() -> None:
+    session = CodexSession.connect_ws(
+        "wss://example.invalid/app",
+        auth={"Modal-Key": "kid", "Modal-Secret": "secret"},
+        token="bearer",
+    )
+    transport = session._transport
+    assert transport._url == "wss://example.invalid/app"
+    assert transport._token == "bearer"
+    assert transport._extra_headers == [
+        ("Modal-Key", "kid"),
+        ("Modal-Secret", "secret"),
+    ]
+
+
 async def _default_handler(transport: FakeTransport, frame: dict) -> None:
     _handshake_reply(transport, frame)
 

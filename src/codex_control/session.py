@@ -246,10 +246,40 @@ class CodexSession:
 
         The optional :mod:`websockets` dependency is imported lazily here.
         """
+        return cls.connect_ws(
+            url,
+            token=token,
+            connect_timeout=connect_timeout,
+            log_rpc_path=log_rpc_path,
+            approval_handler=approval_handler,
+            experimental_api=experimental_api,
+            client_name=client_name,
+            client_version=client_version,
+        )
+
+    @classmethod
+    def connect_ws(
+        cls,
+        url: str,
+        *,
+        auth: dict[str, str] | None = None,
+        token: Optional[str] = None,
+        connect_timeout: float = 30.0,
+        log_rpc_path: Optional[str] = None,
+        approval_handler: Optional[ApprovalHandler] = None,
+        experimental_api: bool = False,
+        client_name: str = "codex-control-remote",
+        client_version: str = _version.__version__,
+    ) -> "CodexSession":
+        """Construct a session backed by a remote WebSocket transport."""
         from .transport.websocket import WebSocketTransport
 
+        headers = list((auth or {}).items())
         transport = WebSocketTransport(
-            url, token=token, connect_timeout=connect_timeout,
+            url,
+            token=token,
+            connect_timeout=connect_timeout,
+            extra_headers=headers,
         )
         rpc_logger = _default_rpc_logger_factory(log_rpc_path) if log_rpc_path else None
         return cls(
